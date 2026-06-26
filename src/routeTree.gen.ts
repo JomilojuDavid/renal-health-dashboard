@@ -9,38 +9,218 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PatientRouteImport } from './routes/patient'
+import { Route as NurseRouteImport } from './routes/nurse'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PatientIndexRouteImport } from './routes/patient.index'
+import { Route as NurseIndexRouteImport } from './routes/nurse.index'
+import { Route as PatientVitalsRouteImport } from './routes/patient.vitals'
+import { Route as PatientSessionsRouteImport } from './routes/patient.sessions'
+import { Route as PatientProfileRouteImport } from './routes/patient.profile'
+import { Route as NurseSettingsRouteImport } from './routes/nurse.settings'
+import { Route as NurseSessionsRouteImport } from './routes/nurse.sessions'
+import { Route as NurseReportsRouteImport } from './routes/nurse.reports'
+import { Route as NursePatientsRouteImport } from './routes/nurse.patients'
+import { Route as NurseAlertsRouteImport } from './routes/nurse.alerts'
 
+const PatientRoute = PatientRouteImport.update({
+  id: '/patient',
+  path: '/patient',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NurseRoute = NurseRouteImport.update({
+  id: '/nurse',
+  path: '/nurse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PatientIndexRoute = PatientIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PatientRoute,
+} as any)
+const NurseIndexRoute = NurseIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => NurseRoute,
+} as any)
+const PatientVitalsRoute = PatientVitalsRouteImport.update({
+  id: '/vitals',
+  path: '/vitals',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientSessionsRoute = PatientSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => PatientRoute,
+} as any)
+const PatientProfileRoute = PatientProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PatientRoute,
+} as any)
+const NurseSettingsRoute = NurseSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => NurseRoute,
+} as any)
+const NurseSessionsRoute = NurseSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => NurseRoute,
+} as any)
+const NurseReportsRoute = NurseReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => NurseRoute,
+} as any)
+const NursePatientsRoute = NursePatientsRouteImport.update({
+  id: '/patients',
+  path: '/patients',
+  getParentRoute: () => NurseRoute,
+} as any)
+const NurseAlertsRoute = NurseAlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => NurseRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/nurse': typeof NurseRouteWithChildren
+  '/patient': typeof PatientRouteWithChildren
+  '/nurse/alerts': typeof NurseAlertsRoute
+  '/nurse/patients': typeof NursePatientsRoute
+  '/nurse/reports': typeof NurseReportsRoute
+  '/nurse/sessions': typeof NurseSessionsRoute
+  '/nurse/settings': typeof NurseSettingsRoute
+  '/patient/profile': typeof PatientProfileRoute
+  '/patient/sessions': typeof PatientSessionsRoute
+  '/patient/vitals': typeof PatientVitalsRoute
+  '/nurse/': typeof NurseIndexRoute
+  '/patient/': typeof PatientIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/nurse/alerts': typeof NurseAlertsRoute
+  '/nurse/patients': typeof NursePatientsRoute
+  '/nurse/reports': typeof NurseReportsRoute
+  '/nurse/sessions': typeof NurseSessionsRoute
+  '/nurse/settings': typeof NurseSettingsRoute
+  '/patient/profile': typeof PatientProfileRoute
+  '/patient/sessions': typeof PatientSessionsRoute
+  '/patient/vitals': typeof PatientVitalsRoute
+  '/nurse': typeof NurseIndexRoute
+  '/patient': typeof PatientIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/nurse': typeof NurseRouteWithChildren
+  '/patient': typeof PatientRouteWithChildren
+  '/nurse/alerts': typeof NurseAlertsRoute
+  '/nurse/patients': typeof NursePatientsRoute
+  '/nurse/reports': typeof NurseReportsRoute
+  '/nurse/sessions': typeof NurseSessionsRoute
+  '/nurse/settings': typeof NurseSettingsRoute
+  '/patient/profile': typeof PatientProfileRoute
+  '/patient/sessions': typeof PatientSessionsRoute
+  '/patient/vitals': typeof PatientVitalsRoute
+  '/nurse/': typeof NurseIndexRoute
+  '/patient/': typeof PatientIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/nurse'
+    | '/patient'
+    | '/nurse/alerts'
+    | '/nurse/patients'
+    | '/nurse/reports'
+    | '/nurse/sessions'
+    | '/nurse/settings'
+    | '/patient/profile'
+    | '/patient/sessions'
+    | '/patient/vitals'
+    | '/nurse/'
+    | '/patient/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/nurse/alerts'
+    | '/nurse/patients'
+    | '/nurse/reports'
+    | '/nurse/sessions'
+    | '/nurse/settings'
+    | '/patient/profile'
+    | '/patient/sessions'
+    | '/patient/vitals'
+    | '/nurse'
+    | '/patient'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/nurse'
+    | '/patient'
+    | '/nurse/alerts'
+    | '/nurse/patients'
+    | '/nurse/reports'
+    | '/nurse/sessions'
+    | '/nurse/settings'
+    | '/patient/profile'
+    | '/patient/sessions'
+    | '/patient/vitals'
+    | '/nurse/'
+    | '/patient/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  NurseRoute: typeof NurseRouteWithChildren
+  PatientRoute: typeof PatientRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/patient': {
+      id: '/patient'
+      path: '/patient'
+      fullPath: '/patient'
+      preLoaderRoute: typeof PatientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nurse': {
+      id: '/nurse'
+      path: '/nurse'
+      fullPath: '/nurse'
+      preLoaderRoute: typeof NurseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +228,122 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/patient/': {
+      id: '/patient/'
+      path: '/'
+      fullPath: '/patient/'
+      preLoaderRoute: typeof PatientIndexRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/nurse/': {
+      id: '/nurse/'
+      path: '/'
+      fullPath: '/nurse/'
+      preLoaderRoute: typeof NurseIndexRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/patient/vitals': {
+      id: '/patient/vitals'
+      path: '/vitals'
+      fullPath: '/patient/vitals'
+      preLoaderRoute: typeof PatientVitalsRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/sessions': {
+      id: '/patient/sessions'
+      path: '/sessions'
+      fullPath: '/patient/sessions'
+      preLoaderRoute: typeof PatientSessionsRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/patient/profile': {
+      id: '/patient/profile'
+      path: '/profile'
+      fullPath: '/patient/profile'
+      preLoaderRoute: typeof PatientProfileRouteImport
+      parentRoute: typeof PatientRoute
+    }
+    '/nurse/settings': {
+      id: '/nurse/settings'
+      path: '/settings'
+      fullPath: '/nurse/settings'
+      preLoaderRoute: typeof NurseSettingsRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/nurse/sessions': {
+      id: '/nurse/sessions'
+      path: '/sessions'
+      fullPath: '/nurse/sessions'
+      preLoaderRoute: typeof NurseSessionsRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/nurse/reports': {
+      id: '/nurse/reports'
+      path: '/reports'
+      fullPath: '/nurse/reports'
+      preLoaderRoute: typeof NurseReportsRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/nurse/patients': {
+      id: '/nurse/patients'
+      path: '/patients'
+      fullPath: '/nurse/patients'
+      preLoaderRoute: typeof NursePatientsRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/nurse/alerts': {
+      id: '/nurse/alerts'
+      path: '/alerts'
+      fullPath: '/nurse/alerts'
+      preLoaderRoute: typeof NurseAlertsRouteImport
+      parentRoute: typeof NurseRoute
+    }
   }
 }
 
+interface NurseRouteChildren {
+  NurseAlertsRoute: typeof NurseAlertsRoute
+  NursePatientsRoute: typeof NursePatientsRoute
+  NurseReportsRoute: typeof NurseReportsRoute
+  NurseSessionsRoute: typeof NurseSessionsRoute
+  NurseSettingsRoute: typeof NurseSettingsRoute
+  NurseIndexRoute: typeof NurseIndexRoute
+}
+
+const NurseRouteChildren: NurseRouteChildren = {
+  NurseAlertsRoute: NurseAlertsRoute,
+  NursePatientsRoute: NursePatientsRoute,
+  NurseReportsRoute: NurseReportsRoute,
+  NurseSessionsRoute: NurseSessionsRoute,
+  NurseSettingsRoute: NurseSettingsRoute,
+  NurseIndexRoute: NurseIndexRoute,
+}
+
+const NurseRouteWithChildren = NurseRoute._addFileChildren(NurseRouteChildren)
+
+interface PatientRouteChildren {
+  PatientProfileRoute: typeof PatientProfileRoute
+  PatientSessionsRoute: typeof PatientSessionsRoute
+  PatientVitalsRoute: typeof PatientVitalsRoute
+  PatientIndexRoute: typeof PatientIndexRoute
+}
+
+const PatientRouteChildren: PatientRouteChildren = {
+  PatientProfileRoute: PatientProfileRoute,
+  PatientSessionsRoute: PatientSessionsRoute,
+  PatientVitalsRoute: PatientVitalsRoute,
+  PatientIndexRoute: PatientIndexRoute,
+}
+
+const PatientRouteWithChildren =
+  PatientRoute._addFileChildren(PatientRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  NurseRoute: NurseRouteWithChildren,
+  PatientRoute: PatientRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
