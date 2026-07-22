@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PatientRouteImport } from './routes/patient'
 import { Route as NurseRouteImport } from './routes/nurse'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -24,6 +25,11 @@ import { Route as NurseReportsRouteImport } from './routes/nurse.reports'
 import { Route as NursePatientsRouteImport } from './routes/nurse.patients'
 import { Route as NurseAlertsRouteImport } from './routes/nurse.alerts'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PatientRoute = PatientRouteImport.update({
   id: '/patient',
   path: '/patient',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/nurse': typeof NurseRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/nurse/alerts': typeof NurseAlertsRoute
   '/nurse/patients': typeof NursePatientsRoute
   '/nurse/reports': typeof NurseReportsRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/nurse/alerts': typeof NurseAlertsRoute
   '/nurse/patients': typeof NursePatientsRoute
   '/nurse/reports': typeof NurseReportsRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/nurse': typeof NurseRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/nurse/alerts': typeof NurseAlertsRoute
   '/nurse/patients': typeof NursePatientsRoute
   '/nurse/reports': typeof NurseReportsRoute
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/nurse'
     | '/patient'
+    | '/reset-password'
     | '/nurse/alerts'
     | '/nurse/patients'
     | '/nurse/reports'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/reset-password'
     | '/nurse/alerts'
     | '/nurse/patients'
     | '/nurse/reports'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/nurse'
     | '/patient'
+    | '/reset-password'
     | '/nurse/alerts'
     | '/nurse/patients'
     | '/nurse/reports'
@@ -196,10 +208,18 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   NurseRoute: typeof NurseRouteWithChildren
   PatientRoute: typeof PatientRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/patient': {
       id: '/patient'
       path: '/patient'
@@ -343,6 +363,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   NurseRoute: NurseRouteWithChildren,
   PatientRoute: PatientRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
