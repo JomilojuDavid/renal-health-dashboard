@@ -128,7 +128,18 @@ function AuthPage() {
                 <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 rounded border-border" />
                 Remember me
               </label>
-              <button type="button" onClick={() => toast.info("Password reset link will be sent — UI demo")} className="text-primary hover:underline">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email) return toast.error("Enter your email first");
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                  });
+                  if (error) toast.error(error.message);
+                  else toast.success("Password reset link sent. Check your email.");
+                }}
+                className="text-primary hover:underline"
+              >
                 Forgot password?
               </button>
             </div>
