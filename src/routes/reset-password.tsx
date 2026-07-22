@@ -17,16 +17,28 @@ function ResetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // When user clicks the recovery link, Supabase sets a temporary session.
+    // The email link brings the user here with #type=recovery in the URL.
+    // Supabase also emits a PASSWORD_RECOVERY event once the session is hydrated.
+    const hash = window.location.hash;
+    if (hash.includes("type=recovery")) {
+      setReady(true);
+    }
+
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+        setReady(true);
+      }
     });
+
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) setReady(true);
+      setChecking(false);
     });
+
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -56,7 +68,11 @@ function ResetPasswordPage() {
         <div className="rounded-2xl border border-border bg-card p-8">
           <h1 className="text-2xl font-semibold tracking-tight">Set a new password</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {ready ? "Enter your new password below." : "Open the reset link from your email to continue."}
+            {checking
+              ? "Verifying recovery link…"
+              : ready
+              ? "Enter your new password below."
+              : "Open the reset link from your email to continue."}
           </p>
 
           <form onSubmit={submit} className="mt-6 space-y-4">
@@ -69,7 +85,7 @@ function ResetPasswordPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  disabled={!ready}
+                  disabled={!ready || checking}
                   className="auth-input pr-11"
                 />
                 <button
@@ -91,13 +107,13 @@ function ResetPasswordPage() {
                 onChange={(e) => setConfirm(e.target.value)}
                 required
                 minLength={6}
-                disabled={!ready}
+                disabled={!ready || checking}
                 className="auth-input"
               />
             </label>
 
             <button
-              disabled={busy || !ready}
+              disabled={busy || !ready || checking}
               className="h-11 w-full rounded-lg bg-primary text-primary-foreground font-medium transition hover:bg-primary/90 disabled:opacity-60"
             >
               {busy ? "Updating…" : "Update password"}
