@@ -27,7 +27,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      // If the user arrived via a password-recovery email link, force them
+      // to the reset page regardless of where Supabase dropped them.
+      if (event === "PASSWORD_RECOVERY" && typeof window !== "undefined") {
+        if (window.location.pathname !== "/reset-password") {
+          window.location.replace("/reset-password");
+          return;
+        }
+      }
       setSession(s);
       setUser(s?.user ?? null);
       setTimeout(() => loadRole(s?.user?.id), 0);
@@ -39,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
 
   return (
     <AuthCtx.Provider
