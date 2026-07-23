@@ -21,26 +21,40 @@ function ResetPasswordPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // The email link brings the user here with #type=recovery in the URL.
-    // Supabase also emits a PASSWORD_RECOVERY event once the session is hydrated.
+    // Recovery links arrive in one of two shapes:
+    //   1) PKCE:      /reset-password?code=xxxx
+    //   2) Implicit:  /reset-password#access_token=...&type=recovery
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
     const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
-      setReady(true);
-    }
+
+    const init = async () => {
+      try {
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          setReady(true);
+        } else if (hash.includes("type=recovery") || hash.includes("access_token")) {
+          setReady(true);
+        } else {
+          const { data } = await supabase.auth.getSession();
+          if (data.session) setReady(true);
+        }
+      } catch (err: any) {
+        toast.error(err.message ?? "Invalid or expired reset link");
+      } finally {
+        setChecking(false);
+      }
+    };
 
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
-        setReady(true);
-      }
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
     });
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true);
-      setChecking(false);
-    });
-
+    init();
     return () => sub.subscription.unsubscribe();
   }, []);
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
