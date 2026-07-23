@@ -130,18 +130,12 @@ function AuthPage() {
               </label>
               <button
                 type="button"
-                onClick={async () => {
-                  if (!email) return toast.error("Enter your email first");
-                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: `${window.location.origin}/reset-password`,
-                  });
-                  if (error) toast.error(error.message);
-                  else toast.success("Password reset link sent. Check your email.");
-                }}
+                onClick={() => navigate({ to: "/forgot-password" })}
                 className="text-primary hover:underline"
               >
                 Forgot password?
               </button>
+
             </div>
 
             <button disabled={busy} className="h-11 w-full rounded-lg bg-primary text-primary-foreground font-medium transition hover:bg-primary/90 disabled:opacity-60">
