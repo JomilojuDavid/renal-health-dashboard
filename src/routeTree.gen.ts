@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PatientRouteImport } from './routes/patient'
 import { Route as NurseRouteImport } from './routes/nurse'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatientIndexRouteImport } from './routes/patient.index'
@@ -38,6 +39,11 @@ const PatientRoute = PatientRouteImport.update({
 const NurseRoute = NurseRouteImport.update({
   id: '/nurse',
   path: '/nurse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -104,6 +110,7 @@ const NurseAlertsRoute = NurseAlertsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/nurse': typeof NurseRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/nurse/alerts': typeof NurseAlertsRoute
   '/nurse/patients': typeof NursePatientsRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/nurse': typeof NurseRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/forgot-password'
     | '/nurse'
     | '/patient'
     | '/reset-password'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/forgot-password'
     | '/reset-password'
     | '/nurse/alerts'
     | '/nurse/patients'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/forgot-password'
     | '/nurse'
     | '/patient'
     | '/reset-password'
@@ -206,6 +218,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   NurseRoute: typeof NurseRouteWithChildren
   PatientRoute: typeof PatientRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       path: '/nurse'
       fullPath: '/nurse'
       preLoaderRoute: typeof NurseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -361,6 +381,7 @@ const PatientRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   NurseRoute: NurseRouteWithChildren,
   PatientRoute: PatientRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
