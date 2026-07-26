@@ -1,95 +1,118 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { RenalLogo } from "@/components/RenalLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
+const searchSchema = z.object({ email: z.string().email().optional() });
+
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
   ssr: false,
+  validateSearch: (s) => searchSchema.parse(s),
 });
 
 function ResetPasswordPage() {
   const navigate = useNavigate();
+  const { email: initialEmail } = Route.useSearch();
+  const [email, setEmail] = useState(initialEmail ?? "");
+  const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [checking, setChecking] = useState(true);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    // Recovery links arrive in one of two shapes:
-    //   1) PKCE:      /reset-password?code=xxxx
-    //   2) Implicit:  /reset-password#access_token=...&type=recovery
-    const url = new URL(window.location.href);
-    const code = url.searchParams.get("code");
-    const hash = window.location.hash;
-
-    const init = async () => {
-      try {
-        if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) throw error;
-          setReady(true);
-        } else if (hash.includes("type=recovery") || hash.includes("access_token")) {
-          setReady(true);
-        } else {
-          const { data } = await supabase.auth.getSession();
-          if (data.session) setReady(true);
-        }
-      } catch (err: any) {
-        toast.error(err.message ?? "Invalid or expired reset link");
-      } finally {
-        setChecking(false);
-      }
-    };
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
-    });
-
-    init();
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return toast.error("Enter your email");
+    if (!/^\d{6}$/.test(code.trim())) return toast.error("Enter the 6-digit code from your email");
     if (password.length < 6) return toast.error("Password must be at least 6 characters");
     if (password !== confirm) return toast.error("Passwords do not match");
     setBusy(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
+      const { error: vErr } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: code.trim(),
+        type: "recovery",
+      });
+      if (vErr) throw vErr;
+
+      const { error: uErr } = await supabase.auth.updateUser({ password });
+      if (uErr) throw uErr;
+
       toast.success("Password updated. Please sign in.");
       await supabase.auth.signOut();
       navigate({ to: "/auth" });
     } catch (err: any) {
-      toast.error(err.message ?? "Could not update password");
+      toast.error(err.message ?? "Could not reset password");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resend = async () => {
+    if (!email) return toast.error("Enter your email first");
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+      if (error) throw error;
+      toast.success("New code sent");
+    } catch (err: any) {
+      toast.error(err.message ?? "Could not resend code");
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="min-h-screen grid place-items-center px-6 bg-background">
+    <div className="min-h-screen grid place-items-center px-6 bg-background relative">
       <div className="absolute right-6 top-6"><ThemeToggle /></div>
       <div className="w-full max-w-md">
         <div className="mb-8 flex justify-center"><RenalLogo /></div>
         <div className="rounded-2xl border border-border bg-card p-8">
-          <h1 className="text-2xl font-semibold tracking-tight">Set a new password</h1>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/forgot-password" })}
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back
+          </button>
+
+          <h1 className="text-2xl font-semibold tracking-tight">Reset your password</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {checking
-              ? "Verifying recovery link…"
-              : ready
-              ? "Enter your new password below."
-              : "Open the reset link from your email to continue."}
+            Enter the 6-digit code we emailed to your account, then choose a new password.
           </p>
 
           <form onSubmit={submit} className="mt-6 space-y-4">
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium">Email</span>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="auth-input"
+                placeholder="you@example.com"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium">Verification code</span>
+              <input
+                inputMode="numeric"
+                pattern="\d{6}"
+                maxLength={6}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                required
+                className="auth-input tracking-[0.5em] text-center font-mono"
+                placeholder="000000"
+              />
+            </label>
+
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium">New password</span>
               <div className="relative">
@@ -99,7 +122,6 @@ function ResetPasswordPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  disabled={!ready || checking}
                   className="auth-input pr-11"
                 />
                 <button
@@ -121,13 +143,12 @@ function ResetPasswordPage() {
                 onChange={(e) => setConfirm(e.target.value)}
                 required
                 minLength={6}
-                disabled={!ready || checking}
                 className="auth-input"
               />
             </label>
 
             <button
-              disabled={busy || !ready || checking}
+              disabled={busy}
               className="h-11 w-full rounded-lg bg-primary text-primary-foreground font-medium transition hover:bg-primary/90 disabled:opacity-60"
             >
               {busy ? "Updating…" : "Update password"}
@@ -135,10 +156,11 @@ function ResetPasswordPage() {
 
             <button
               type="button"
-              onClick={() => navigate({ to: "/auth" })}
-              className="w-full text-sm text-muted-foreground hover:text-foreground"
+              onClick={resend}
+              disabled={busy}
+              className="w-full text-sm text-primary hover:underline"
             >
-              Back to sign in
+              Didn't get the code? Resend
             </button>
           </form>
         </div>
