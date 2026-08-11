@@ -76,6 +76,7 @@ function ForgotPasswordPage() {
             </button>
           </form>
         </div>
+        <Copyright className="mt-8 text-center" />
       </div>
       <style>{`.auth-input{display:block;width:100%;height:2.75rem;border-radius:.5rem;border:1px solid var(--color-border);background:var(--color-card);padding:0 .875rem;font-size:.875rem;outline:none;transition:border-color .15s, box-shadow .15s}.auth-input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent)}`}</style>
     </div>

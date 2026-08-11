@@ -43,7 +43,10 @@ function PatientLayout() {
           <LogOut className="h-4 w-4" />
         </button>
       </header>
-      <main className="flex-1 px-5 py-6 pb-28 overflow-auto"><Outlet /></main>
+      <main className="flex-1 px-5 py-6 pb-28 overflow-auto">
+        <Outlet />
+        <Copyright className="mt-10 mb-4 text-center" />
+      </main>
       <nav className="fixed bottom-0 inset-x-0 mx-auto max-w-md md:max-w-lg border-t border-border bg-card/95 backdrop-blur">
         <div className="grid grid-cols-4">
           {tabs.map(t => {

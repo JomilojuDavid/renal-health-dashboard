@@ -69,6 +69,7 @@ function NurseLayout() {
             <LogOut className="h-4 w-4" />
             {!collapsed && <span>Logout</span>}
           </button>
+          <Copyright className={`mt-3 ${collapsed ? "hidden" : "block"}`} />
         </div>
       </aside>
 
