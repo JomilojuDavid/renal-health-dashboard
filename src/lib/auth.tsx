@@ -23,7 +23,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadRole = async (uid: string | undefined) => {
     if (!uid) return setRole(null);
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid).maybeSingle();
-    setRole((data?.role as Role) ?? null);
+    let next = (data?.role as Role) ?? null;
+
+    // Social sign-in (Google) has no role metadata: claim the role the user
+    // picked on the auth screen. The DB policy only allows this once.
+    if (!next && typeof window !== "undefined") {
+      const pending = window.localStorage.getItem("renalwatch:pending-role");
+      if (pending === "nurse" || pending === "patient") {
+        const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: pending });
+        window.localStorage.removeItem("renalwatch:pending-role");
+        if (!error) next = pending;
+      }
+    }
+    setRole(next);
   };
 
   useEffect(() => {
