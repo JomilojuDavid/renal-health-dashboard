@@ -6,6 +6,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { RenalLogo } from "@/components/RenalLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Copyright } from "@/components/Copyright";
 
 const searchSchema = z.object({ email: z.string().email().optional() });
 
@@ -164,6 +165,7 @@ function ResetPasswordPage() {
             </button>
           </form>
         </div>
+        <Copyright className="mt-8 text-center" />
       </div>
       <style>{`.auth-input{display:block;width:100%;height:2.75rem;border-radius:.5rem;border:1px solid var(--color-border);background:var(--color-card);padding:0 .875rem;font-size:.875rem;outline:none;transition:border-color .15s, box-shadow .15s}.auth-input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent)}`}</style>
     </div>

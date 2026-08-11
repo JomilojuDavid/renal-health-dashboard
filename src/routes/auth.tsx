@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { RenalLogo } from "@/components/RenalLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Copyright } from "@/components/Copyright";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -149,6 +150,7 @@ function AuthPage() {
               {mode === "signin" ? "Create account" : "Sign in"}
             </button>
           </p>
+          <Copyright className="mt-8 text-center" />
         </div>
       </div>
       <style>{`.auth-input{display:block;width:100%;height:2.75rem;border-radius:.5rem;border:1px solid var(--color-border);background:var(--color-card);padding:0 .875rem;font-size:.875rem;outline:none;transition:border-color .15s, box-shadow .15s}.auth-input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent)}`}</style>
