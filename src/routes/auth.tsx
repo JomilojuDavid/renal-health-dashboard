@@ -60,6 +60,22 @@ function AuthPage() {
     }
   };
 
+  const signInWithGoogle = async () => {
+    setBusy(true);
+    try {
+      window.localStorage.setItem("renalwatch:pending-role", selectedRole);
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw new Error(result.error.message ?? "Google sign-in failed");
+      if (result.redirected) return;
+    } catch (err: any) {
+      toast.error(err.message ?? "Google sign-in failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="hidden lg:flex relative flex-col justify-between p-12 bg-gradient-to-br from-primary/95 to-primary/70 text-primary-foreground overflow-hidden">
