@@ -4,6 +4,7 @@ import { Home, Users, Activity, BellRing, FileBarChart, Settings, LogOut, Menu }
 import { useAuth } from "@/lib/auth";
 import { RenalLogo } from "@/components/RenalLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Copyright } from "@/components/Copyright";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/nurse")({

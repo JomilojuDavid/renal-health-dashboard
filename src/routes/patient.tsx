@@ -4,6 +4,7 @@ import { Home, Activity, CalendarClock, User, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { RenalLogo } from "@/components/RenalLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Copyright } from "@/components/Copyright";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/patient")({ component: PatientLayout, ssr: false });

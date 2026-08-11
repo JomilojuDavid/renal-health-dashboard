@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { RenalLogo } from "@/components/RenalLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Copyright } from "@/components/Copyright";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
