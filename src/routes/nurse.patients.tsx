@@ -77,6 +77,50 @@ function PatientsPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  // Accounts with the patient role, for linking a login to a clinical record
+  const { data: patientAccounts = [] } = useQuery({
+    queryKey: ["patient-accounts"],
+    queryFn: async () => {
+      const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "patient");
+      const ids = (roles ?? []).map((r: any) => r.user_id);
+      if (!ids.length) return [];
+      const { data } = await supabase.from("profiles").select("id,full_name,email").in("id", ids);
+      return (data ?? []) as { id: string; full_name: string | null; email: string | null }[];
+    },
+  });
+
+  const [linkFor, setLinkFor] = useState<any | null>(null);
+  const linkAccount = useMutation({
+    mutationFn: async ({ patientId, userId }: { patientId: string; userId: string | null }) => {
+      const { error } = await supabase.from("patients").update({ user_id: userId }).eq("id", patientId);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Account link updated"); setLinkFor(null); qc.invalidateQueries(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const { data: activeSessions = {} } = useQuery({
+    queryKey: ["active-session-map"],
+    queryFn: async () => {
+      const { data } = await supabase.from("sessions").select("id,patient_id").is("ended_at", null);
+      const map: Record<string, string> = {};
+      for (const s of (data ?? []) as any[]) map[s.patient_id] = s.id;
+      return map;
+    },
+    refetchInterval: 15000,
+  });
+
+  const startSession = useMutation({
+    mutationFn: async (patientId: string) => {
+      const { error } = await supabase.from("sessions").insert({ patient_id: patientId, started_at: new Date().toISOString() });
+      if (error) throw error;
+      await supabase.from("patients").update({ status: "Active" }).eq("id", patientId);
+    },
+    onSuccess: () => { toast.success("Session started"); qc.invalidateQueries(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+
   const filtered = patients.filter((p: any) => {
     const matchesQ = !q || p.name.toLowerCase().includes(q.toLowerCase());
     const matchesStatus = statusFilter === "All" || p.status === statusFilter;
