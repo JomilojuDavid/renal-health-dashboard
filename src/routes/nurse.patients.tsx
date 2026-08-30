@@ -225,6 +225,32 @@ function PatientsPage() {
           </div>
         </div>
       )}
+
+      {linkFor && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-foreground/30 backdrop-blur-sm" onClick={() => setLinkFor(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-xl bg-card border border-border p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-semibold">Link login account</h2>
+              <button onClick={() => setLinkFor(null)} className="h-8 w-8 grid place-items-center rounded hover:bg-accent"><X className="h-4 w-4" /></button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">Connect {linkFor.name} to a patient login so they can see their own vitals.</p>
+            <select
+              defaultValue={linkFor.user_id ?? ""}
+              onChange={(e) => linkAccount.mutate({ patientId: linkFor.id, userId: e.target.value || null })}
+              className="h-10 w-full px-3 rounded-lg border border-border bg-background text-sm"
+            >
+              <option value="">Not linked</option>
+              {patientAccounts.map((a) => (
+                <option key={a.id} value={a.id}>{a.full_name || a.email || a.id}{a.email ? ` · ${a.email}` : ""}</option>
+              ))}
+            </select>
+            {patientAccounts.length === 0 && (
+              <p className="mt-3 text-xs text-muted-foreground">No patient accounts have signed up yet.</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
+
   );
 }
