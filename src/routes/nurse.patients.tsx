@@ -173,10 +173,17 @@ function PatientsPage() {
                 <td className="p-4"><StatusBadge status={p.status} /></td>
                 <td className="p-4">
                   <div className="flex gap-1 justify-end">
+                    {(activeSessions as any)[p.id] ? (
+                      <span className="h-8 px-2 inline-flex items-center rounded text-xs text-primary">In session</span>
+                    ) : (
+                      <button title="Start session" onClick={() => startSession.mutate(p.id)} className="h-8 w-8 grid place-items-center rounded hover:bg-accent text-primary"><Play className="h-4 w-4" /></button>
+                    )}
+                    <button title={p.user_id ? "Linked account" : "Link login account"} onClick={() => setLinkFor(p)} className={`h-8 w-8 grid place-items-center rounded hover:bg-accent ${p.user_id ? "text-primary" : "text-muted-foreground"}`}><Link2 className="h-4 w-4" /></button>
                     <button onClick={() => { setEditing(p.id); setForm({ name: p.name, age: p.age?.toString() ?? "", gender: p.gender ?? "", diagnosis: p.diagnosis ?? "", contact: p.contact ?? "", dialysis_frequency: p.dialysis_frequency ?? "" }); setModalOpen(true); }} className="h-8 w-8 grid place-items-center rounded hover:bg-accent"><Pencil className="h-4 w-4" /></button>
                     <button onClick={() => confirm(`Delete ${p.name}?`) && remove.mutate(p.id)} className="h-8 w-8 grid place-items-center rounded hover:bg-destructive/10 text-destructive"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </td>
+
               </tr>
             ))}
           </tbody>
