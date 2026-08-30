@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Search, Trash2, Pencil, X } from "lucide-react";
+import { Plus, Search, Trash2, Pencil, X, Link2, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "./nurse.index";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/nurse/patients")({
   component: PatientsPage,
