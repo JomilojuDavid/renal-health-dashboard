@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Search, Trash2, Pencil, X } from "lucide-react";
+import { Plus, Search, Trash2, Pencil, X, Link2, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "./nurse.index";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/nurse/patients")({
   component: PatientsPage,
@@ -76,6 +77,50 @@ function PatientsPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  // Accounts with the patient role, for linking a login to a clinical record
+  const { data: patientAccounts = [] } = useQuery({
+    queryKey: ["patient-accounts"],
+    queryFn: async () => {
+      const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "patient");
+      const ids = (roles ?? []).map((r: any) => r.user_id);
+      if (!ids.length) return [];
+      const { data } = await supabase.from("profiles").select("id,full_name,email").in("id", ids);
+      return (data ?? []) as { id: string; full_name: string | null; email: string | null }[];
+    },
+  });
+
+  const [linkFor, setLinkFor] = useState<any | null>(null);
+  const linkAccount = useMutation({
+    mutationFn: async ({ patientId, userId }: { patientId: string; userId: string | null }) => {
+      const { error } = await supabase.from("patients").update({ user_id: userId }).eq("id", patientId);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Account link updated"); setLinkFor(null); qc.invalidateQueries(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const { data: activeSessions = {} } = useQuery({
+    queryKey: ["active-session-map"],
+    queryFn: async () => {
+      const { data } = await supabase.from("sessions").select("id,patient_id").is("ended_at", null);
+      const map: Record<string, string> = {};
+      for (const s of (data ?? []) as any[]) map[s.patient_id] = s.id;
+      return map;
+    },
+    refetchInterval: 15000,
+  });
+
+  const startSession = useMutation({
+    mutationFn: async (patientId: string) => {
+      const { error } = await supabase.from("sessions").insert({ patient_id: patientId, started_at: new Date().toISOString() });
+      if (error) throw error;
+      await supabase.from("patients").update({ status: "Active" }).eq("id", patientId);
+    },
+    onSuccess: () => { toast.success("Session started"); qc.invalidateQueries(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+
   const filtered = patients.filter((p: any) => {
     const matchesQ = !q || p.name.toLowerCase().includes(q.toLowerCase());
     const matchesStatus = statusFilter === "All" || p.status === statusFilter;
@@ -128,10 +173,17 @@ function PatientsPage() {
                 <td className="p-4"><StatusBadge status={p.status} /></td>
                 <td className="p-4">
                   <div className="flex gap-1 justify-end">
+                    {(activeSessions as any)[p.id] ? (
+                      <span className="h-8 px-2 inline-flex items-center rounded text-xs text-primary">In session</span>
+                    ) : (
+                      <button title="Start session" onClick={() => startSession.mutate(p.id)} className="h-8 w-8 grid place-items-center rounded hover:bg-accent text-primary"><Play className="h-4 w-4" /></button>
+                    )}
+                    <button title={p.user_id ? "Linked account" : "Link login account"} onClick={() => setLinkFor(p)} className={`h-8 w-8 grid place-items-center rounded hover:bg-accent ${p.user_id ? "text-primary" : "text-muted-foreground"}`}><Link2 className="h-4 w-4" /></button>
                     <button onClick={() => { setEditing(p.id); setForm({ name: p.name, age: p.age?.toString() ?? "", gender: p.gender ?? "", diagnosis: p.diagnosis ?? "", contact: p.contact ?? "", dialysis_frequency: p.dialysis_frequency ?? "" }); setModalOpen(true); }} className="h-8 w-8 grid place-items-center rounded hover:bg-accent"><Pencil className="h-4 w-4" /></button>
                     <button onClick={() => confirm(`Delete ${p.name}?`) && remove.mutate(p.id)} className="h-8 w-8 grid place-items-center rounded hover:bg-destructive/10 text-destructive"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </td>
+
               </tr>
             ))}
           </tbody>
@@ -173,6 +225,32 @@ function PatientsPage() {
           </div>
         </div>
       )}
+
+      {linkFor && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-foreground/30 backdrop-blur-sm" onClick={() => setLinkFor(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-xl bg-card border border-border p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-semibold">Link login account</h2>
+              <button onClick={() => setLinkFor(null)} className="h-8 w-8 grid place-items-center rounded hover:bg-accent"><X className="h-4 w-4" /></button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">Connect {linkFor.name} to a patient login so they can see their own vitals.</p>
+            <select
+              defaultValue={linkFor.user_id ?? ""}
+              onChange={(e) => linkAccount.mutate({ patientId: linkFor.id, userId: e.target.value || null })}
+              className="h-10 w-full px-3 rounded-lg border border-border bg-background text-sm"
+            >
+              <option value="">Not linked</option>
+              {patientAccounts.map((a) => (
+                <option key={a.id} value={a.id}>{a.full_name || a.email || a.id}{a.email ? ` · ${a.email}` : ""}</option>
+              ))}
+            </select>
+            {patientAccounts.length === 0 && (
+              <p className="mt-3 text-xs text-muted-foreground">No patient accounts have signed up yet.</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
+
   );
 }
