@@ -4,7 +4,6 @@ import { Home, Activity, CalendarClock, User, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { RenalLogo } from "@/components/RenalLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Copyright } from "@/components/Copyright";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/patient")({ component: PatientLayout, ssr: false });
@@ -45,7 +44,6 @@ function PatientLayout() {
       </header>
       <main className="flex-1 px-5 py-6 pb-28 overflow-auto">
         <Outlet />
-        <Copyright className="mt-10 mb-4 text-center" />
       </main>
       <nav className="fixed bottom-0 inset-x-0 mx-auto max-w-md md:max-w-lg border-t border-border bg-card/95 backdrop-blur">
         <div className="grid grid-cols-4">

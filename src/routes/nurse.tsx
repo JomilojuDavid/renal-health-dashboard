@@ -4,7 +4,6 @@ import { Home, Users, Activity, BellRing, FileBarChart, Settings, LogOut, Menu }
 import { useAuth } from "@/lib/auth";
 import { RenalLogo } from "@/components/RenalLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Copyright } from "@/components/Copyright";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/nurse")({
@@ -69,7 +68,6 @@ function NurseLayout() {
             <LogOut className="h-4 w-4" />
             {!collapsed && <span>Logout</span>}
           </button>
-          <Copyright className={`mt-3 ${collapsed ? "hidden" : "block"}`} />
         </div>
       </aside>
 
