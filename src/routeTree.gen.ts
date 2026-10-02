@@ -9,42 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as NurseRouteImport } from './routes/nurse'
-import { Route as PatientRouteImport } from './routes/patient'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as NurseIndexRouteImport } from './routes/nurse.index'
-import { Route as NurseAlertsRouteImport } from './routes/nurse.alerts'
-import { Route as NurseMonitorRouteImport } from './routes/nurse.monitor'
-import { Route as NursePatientsRouteImport } from './routes/nurse.patients'
-import { Route as NurseReportsRouteImport } from './routes/nurse.reports'
-import { Route as NurseSessionsRouteImport } from './routes/nurse.sessions'
-import { Route as NurseSettingsRouteImport } from './routes/nurse.settings'
+import { Route as PatientRouteImport } from './routes/patient'
+import { Route as NurseRouteImport } from './routes/nurse'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatientIndexRouteImport } from './routes/patient.index'
-import { Route as PatientProfileRouteImport } from './routes/patient.profile'
-import { Route as PatientSessionsRouteImport } from './routes/patient.sessions'
+import { Route as NurseIndexRouteImport } from './routes/nurse.index'
 import { Route as PatientVitalsRouteImport } from './routes/patient.vitals'
+import { Route as PatientSessionsRouteImport } from './routes/patient.sessions'
+import { Route as PatientProfileRouteImport } from './routes/patient.profile'
+import { Route as NurseSettingsRouteImport } from './routes/nurse.settings'
+import { Route as NurseSessionsRouteImport } from './routes/nurse.sessions'
+import { Route as NurseReportsRouteImport } from './routes/nurse.reports'
+import { Route as NursePatientsRouteImport } from './routes/nurse.patients'
+import { Route as NurseMonitorRouteImport } from './routes/nurse.monitor'
+import { Route as NurseAlertsRouteImport } from './routes/nurse.alerts'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NurseRoute = NurseRouteImport.update({
-  id: '/nurse',
-  path: '/nurse',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PatientRoute = PatientRouteImport.update({
@@ -52,54 +37,39 @@ const PatientRoute = PatientRouteImport.update({
   path: '/patient',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const NurseRoute = NurseRouteImport.update({
+  id: '/nurse',
+  path: '/nurse',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NurseIndexRoute = NurseIndexRouteImport.update({
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => NurseRoute,
-} as any)
-const NurseAlertsRoute = NurseAlertsRouteImport.update({
-  id: '/alerts',
-  path: '/alerts',
-  getParentRoute: () => NurseRoute,
-} as any)
-const NurseMonitorRoute = NurseMonitorRouteImport.update({
-  id: '/monitor',
-  path: '/monitor',
-  getParentRoute: () => NurseRoute,
-} as any)
-const NursePatientsRoute = NursePatientsRouteImport.update({
-  id: '/patients',
-  path: '/patients',
-  getParentRoute: () => NurseRoute,
-} as any)
-const NurseReportsRoute = NurseReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => NurseRoute,
-} as any)
-const NurseSessionsRoute = NurseSessionsRouteImport.update({
-  id: '/sessions',
-  path: '/sessions',
-  getParentRoute: () => NurseRoute,
-} as any)
-const NurseSettingsRoute = NurseSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => NurseRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PatientIndexRoute = PatientIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PatientRoute,
 } as any)
-const PatientProfileRoute = PatientProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+const NurseIndexRoute = NurseIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => NurseRoute,
+} as any)
+const PatientVitalsRoute = PatientVitalsRouteImport.update({
+  id: '/vitals',
+  path: '/vitals',
   getParentRoute: () => PatientRoute,
 } as any)
 const PatientSessionsRoute = PatientSessionsRouteImport.update({
@@ -107,10 +77,40 @@ const PatientSessionsRoute = PatientSessionsRouteImport.update({
   path: '/sessions',
   getParentRoute: () => PatientRoute,
 } as any)
-const PatientVitalsRoute = PatientVitalsRouteImport.update({
-  id: '/vitals',
-  path: '/vitals',
+const PatientProfileRoute = PatientProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => PatientRoute,
+} as any)
+const NurseSettingsRoute = NurseSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => NurseRoute,
+} as any)
+const NurseSessionsRoute = NurseSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => NurseRoute,
+} as any)
+const NurseReportsRoute = NurseReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => NurseRoute,
+} as any)
+const NursePatientsRoute = NursePatientsRouteImport.update({
+  id: '/patients',
+  path: '/patients',
+  getParentRoute: () => NurseRoute,
+} as any)
+const NurseMonitorRoute = NurseMonitorRouteImport.update({
+  id: '/monitor',
+  path: '/monitor',
+  getParentRoute: () => NurseRoute,
+} as any)
+const NurseAlertsRoute = NurseAlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => NurseRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -238,32 +238,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/nurse': {
-      id: '/nurse'
-      path: '/nurse'
-      fullPath: '/nurse'
-      preLoaderRoute: typeof NurseRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/patient': {
@@ -273,61 +252,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/nurse': {
+      id: '/nurse'
+      path: '/nurse'
+      fullPath: '/nurse'
+      preLoaderRoute: typeof NurseRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/nurse/': {
-      id: '/nurse/'
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
       path: '/'
-      fullPath: '/nurse/'
-      preLoaderRoute: typeof NurseIndexRouteImport
-      parentRoute: typeof NurseRoute
-    }
-    '/nurse/alerts': {
-      id: '/nurse/alerts'
-      path: '/alerts'
-      fullPath: '/nurse/alerts'
-      preLoaderRoute: typeof NurseAlertsRouteImport
-      parentRoute: typeof NurseRoute
-    }
-    '/nurse/monitor': {
-      id: '/nurse/monitor'
-      path: '/monitor'
-      fullPath: '/nurse/monitor'
-      preLoaderRoute: typeof NurseMonitorRouteImport
-      parentRoute: typeof NurseRoute
-    }
-    '/nurse/patients': {
-      id: '/nurse/patients'
-      path: '/patients'
-      fullPath: '/nurse/patients'
-      preLoaderRoute: typeof NursePatientsRouteImport
-      parentRoute: typeof NurseRoute
-    }
-    '/nurse/reports': {
-      id: '/nurse/reports'
-      path: '/reports'
-      fullPath: '/nurse/reports'
-      preLoaderRoute: typeof NurseReportsRouteImport
-      parentRoute: typeof NurseRoute
-    }
-    '/nurse/sessions': {
-      id: '/nurse/sessions'
-      path: '/sessions'
-      fullPath: '/nurse/sessions'
-      preLoaderRoute: typeof NurseSessionsRouteImport
-      parentRoute: typeof NurseRoute
-    }
-    '/nurse/settings': {
-      id: '/nurse/settings'
-      path: '/settings'
-      fullPath: '/nurse/settings'
-      preLoaderRoute: typeof NurseSettingsRouteImport
-      parentRoute: typeof NurseRoute
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/patient/': {
       id: '/patient/'
@@ -336,11 +287,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientIndexRouteImport
       parentRoute: typeof PatientRoute
     }
-    '/patient/profile': {
-      id: '/patient/profile'
-      path: '/profile'
-      fullPath: '/patient/profile'
-      preLoaderRoute: typeof PatientProfileRouteImport
+    '/nurse/': {
+      id: '/nurse/'
+      path: '/'
+      fullPath: '/nurse/'
+      preLoaderRoute: typeof NurseIndexRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/patient/vitals': {
+      id: '/patient/vitals'
+      path: '/vitals'
+      fullPath: '/patient/vitals'
+      preLoaderRoute: typeof PatientVitalsRouteImport
       parentRoute: typeof PatientRoute
     }
     '/patient/sessions': {
@@ -350,12 +308,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientSessionsRouteImport
       parentRoute: typeof PatientRoute
     }
-    '/patient/vitals': {
-      id: '/patient/vitals'
-      path: '/vitals'
-      fullPath: '/patient/vitals'
-      preLoaderRoute: typeof PatientVitalsRouteImport
+    '/patient/profile': {
+      id: '/patient/profile'
+      path: '/profile'
+      fullPath: '/patient/profile'
+      preLoaderRoute: typeof PatientProfileRouteImport
       parentRoute: typeof PatientRoute
+    }
+    '/nurse/settings': {
+      id: '/nurse/settings'
+      path: '/settings'
+      fullPath: '/nurse/settings'
+      preLoaderRoute: typeof NurseSettingsRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/nurse/sessions': {
+      id: '/nurse/sessions'
+      path: '/sessions'
+      fullPath: '/nurse/sessions'
+      preLoaderRoute: typeof NurseSessionsRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/nurse/reports': {
+      id: '/nurse/reports'
+      path: '/reports'
+      fullPath: '/nurse/reports'
+      preLoaderRoute: typeof NurseReportsRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/nurse/patients': {
+      id: '/nurse/patients'
+      path: '/patients'
+      fullPath: '/nurse/patients'
+      preLoaderRoute: typeof NursePatientsRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/nurse/monitor': {
+      id: '/nurse/monitor'
+      path: '/monitor'
+      fullPath: '/nurse/monitor'
+      preLoaderRoute: typeof NurseMonitorRouteImport
+      parentRoute: typeof NurseRoute
+    }
+    '/nurse/alerts': {
+      id: '/nurse/alerts'
+      path: '/alerts'
+      fullPath: '/nurse/alerts'
+      preLoaderRoute: typeof NurseAlertsRouteImport
+      parentRoute: typeof NurseRoute
     }
   }
 }
