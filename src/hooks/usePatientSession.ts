@@ -52,7 +52,7 @@ export function usePatientSession() {
       patientId,
       patientName,
       sessionStartedAt: data.started_at,
-      telemetryStartsAt: new Date(clickedAt + 3000).toISOString(),
+      telemetryStartsAt: new Date(clickedAt + 7000).toISOString(),
     };
     emit();
     return current;
