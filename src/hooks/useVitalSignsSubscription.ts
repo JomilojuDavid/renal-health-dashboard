@@ -5,6 +5,7 @@ import type { PatientSession } from "./usePatientSession";
 export interface VitalSignLog {
   id: string;
   patient_id: string;
+  session_id: string | null;
   spo2: number | null;
   heart_rate: number | null;
   body_temperature: number | null;
@@ -25,36 +26,47 @@ export function useVitalSignsSubscription(session: PatientSession | null, limit 
       return;
     }
     let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | undefined;
 
-    supabase
-      .from("vital_sign_logs")
-      .select("id, patient_id, spo2, heart_rate, body_temperature, measured_at")
-      .eq("patient_id", session.patientId)
-      .gte("measured_at", session.sessionStartedAt)
-      .order("measured_at", { ascending: true })
-      .limit(limit)
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        if (error) setError(error.message);
-        else setVitals((prev) => mergeRows(data as VitalSignLog[], prev, limit));
-      });
+    const startSubscription = () => {
+      if (cancelled) return;
 
-    const channel = supabase
-      .channel(`vital-logs-${session.sessionId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "vital_sign_logs", filter: `patient_id=eq.${session.patientId}` },
-        (payload) => {
-          const row = payload.new as VitalSignLog;
-          if (row.measured_at < session.sessionStartedAt) return;
-          setVitals((prev) => mergeRows(prev, [row], limit));
-        },
-      )
-      .subscribe((status) => setIsConnected(status === "SUBSCRIBED"));
+      supabase
+        .from("vital_sign_logs")
+        .select("id, patient_id, session_id, spo2, heart_rate, body_temperature, measured_at")
+        .eq("session_id", session.sessionId)
+        .gte("measured_at", session.telemetryStartsAt)
+        .order("measured_at", { ascending: true })
+        .limit(limit)
+        .then(({ data, error }) => {
+          if (cancelled) return;
+          if (error) setError(error.message);
+          else setVitals((prev) => mergeRows(prev, data as VitalSignLog[], limit));
+        });
+
+      channel = supabase
+        .channel(`vital-logs-${session.sessionId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "vital_sign_logs", filter: `patient_id=eq.${session.patientId}` },
+          (payload) => {
+            const row = payload.new as VitalSignLog;
+            if (row.session_id !== session.sessionId || row.measured_at < session.telemetryStartsAt) return;
+            setVitals((prev) => mergeRows(prev, [row], limit));
+          },
+        )
+        .subscribe((status) => setIsConnected(status === "SUBSCRIBED"));
+    };
+
+    const startTimer = setTimeout(
+      startSubscription,
+      Math.max(0, new Date(session.telemetryStartsAt).getTime() - Date.now()),
+    );
 
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      clearTimeout(startTimer);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [session, limit]);
 

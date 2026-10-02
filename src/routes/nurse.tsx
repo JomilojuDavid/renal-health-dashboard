@@ -4,6 +4,8 @@ import { Home, Users, Activity, BellRing, FileBarChart, Settings, LogOut, Menu }
 import { useAuth } from "@/lib/auth";
 import { RenalLogo } from "@/components/RenalLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { usePatientSession } from "@/hooks/usePatientSession";
+import { useVitalSignsTelemetry } from "@/hooks/useVitalSignsTelemetry";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/nurse")({
@@ -23,6 +25,8 @@ const nav: { to: string; label: string; icon: typeof Home; exact?: boolean }[] =
 
 function NurseLayout() {
   const { user, role, loading, signOut } = useAuth();
+  const { session } = usePatientSession();
+  useVitalSignsTelemetry(session);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });

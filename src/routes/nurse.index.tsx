@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { PatientDrawer } from "@/components/PatientDrawer";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
+import { usePatientSession, type PatientSession } from "@/hooks/usePatientSession";
+import { useVitalSignsSubscription } from "@/hooks/useVitalSignsSubscription";
 
 export const Route = createFileRoute("/nurse/")({
   component: Dashboard,
@@ -12,10 +14,9 @@ export const Route = createFileRoute("/nurse/")({
 });
 
 type Patient = { id: string; name: string; status: string; age: number | null; diagnosis: string | null; dialysis_frequency: string | null };
-type Vital = { hr: number | null; spo2: number | null; temp: number | null; recorded_at: string };
-
 function Dashboard() {
   const [selected, setSelected] = useState<string | null>(null);
+  const { session } = usePatientSession();
 
   const { data: patients = [], isLoading } = useQuery({
     queryKey: ["nurse-patients"],
@@ -23,27 +24,6 @@ function Dashboard() {
       const { data, error } = await supabase.from("patients").select("id,name,status,age,diagnosis,dialysis_frequency").order("name");
       if (error) throw error;
       return data as Patient[];
-    },
-    refetchInterval: 15000,
-  });
-
-  const { data: latestVitals = {} } = useQuery({
-    queryKey: ["nurse-latest-vitals", patients.map((p) => p.id)],
-    enabled: patients.length > 0,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("vitals")
-        .select("patient_id,hr,spo2,temp,recorded_at")
-        .in("patient_id", patients.map((p) => p.id))
-        .order("recorded_at", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      const grouped: Record<string, Vital[]> = {};
-      for (const row of data as any[]) {
-        if (!grouped[row.patient_id]) grouped[row.patient_id] = [];
-        if (grouped[row.patient_id].length < 10) grouped[row.patient_id].push(row);
-      }
-      return grouped;
     },
     refetchInterval: 15000,
   });
@@ -93,45 +73,62 @@ function Dashboard() {
         <div className="rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">No patients yet.</div>
       ) : (
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {patients.map((p) => {
-            const v = (latestVitals as any)[p.id] as Vital[] | undefined;
-            const latest = v?.[0];
-            const critical = p.status === "Critical";
-            return (
-              <button
-                key={p.id}
-                onClick={() => setSelected(p.id)}
-                className={`text-left rounded-xl border bg-card p-5 transition hover:shadow-md ${critical ? "border-l-4 border-l-destructive border-destructive/30 bg-destructive/[0.04]" : "border-border"}`}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-medium">{p.name}</div>
-                    <div className="text-xs text-muted-foreground">{p.diagnosis ?? "—"}</div>
-                  </div>
-                  <StatusBadge status={p.status} />
-                </div>
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                  <Metric label="HR" value={latest?.hr ?? "—"} unit="bpm" pulse />
-                  <Metric label="SpO₂" value={latest?.spo2 ? Math.round(Number(latest.spo2)) : "—"} unit="%" />
-                  <Metric label="Temp" value={latest?.temp ? Number(latest.temp).toFixed(1) : "—"} unit="°C" />
-                </div>
-                {v && v.length > 1 && (
-                  <div className="mt-4 h-12">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={[...v].reverse()}>
-                        <Line type="monotone" dataKey="hr" stroke="var(--color-primary)" strokeWidth={1.75} dot={false} isAnimationActive={false} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </button>
-            );
-          })}
+          {patients.map((p) => (
+            <PatientVitalCard
+              key={p.id}
+              patient={p}
+              session={session?.patientId === p.id ? session : null}
+              onSelect={() => setSelected(p.id)}
+            />
+          ))}
         </div>
       )}
 
       <PatientDrawer patientId={selected} onClose={() => setSelected(null)} />
     </div>
+  );
+}
+
+function PatientVitalCard({
+  patient,
+  session,
+  onSelect,
+}: {
+  patient: Patient;
+  session: PatientSession | null;
+  onSelect: () => void;
+}) {
+  const { vitals, latestVital } = useVitalSignsSubscription(session);
+  const critical = patient.status === "Critical";
+  const chartData = vitals.map((vital) => ({ hr: vital.heart_rate }));
+
+  return (
+    <button
+      onClick={onSelect}
+      className={`text-left rounded-xl border bg-card p-5 transition hover:shadow-md ${critical ? "border-l-4 border-l-destructive border-destructive/30 bg-destructive/[0.04]" : "border-border"}`}
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="font-medium">{patient.name}</div>
+          <div className="text-xs text-muted-foreground">{patient.diagnosis ?? "—"}</div>
+        </div>
+        <StatusBadge status={patient.status} />
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+        <Metric label="HR" value={latestVital?.heart_rate ?? "—"} unit="bpm" pulse />
+        <Metric label="SpO₂" value={latestVital?.spo2 != null ? Math.round(Number(latestVital.spo2)) : "—"} unit="%" />
+        <Metric label="Temp" value={latestVital?.body_temperature != null ? Number(latestVital.body_temperature).toFixed(1) : "—"} unit="°C" />
+      </div>
+      {chartData.length > 1 && (
+        <div className="mt-4 h-12">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <Line type="monotone" dataKey="hr" stroke="var(--color-primary)" strokeWidth={1.75} dot={false} isAnimationActive={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </button>
   );
 }
 

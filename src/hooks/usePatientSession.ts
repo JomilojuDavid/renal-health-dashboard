@@ -6,6 +6,7 @@ export interface PatientSession {
   patientId: string;
   patientName: string;
   sessionStartedAt: string;
+  telemetryStartsAt: string;
 }
 
 let current: PatientSession | null = null;
@@ -16,9 +17,9 @@ const subscribe = (l: () => void) => {
   return () => listeners.delete(l);
 };
 
-async function closeSession(session: PatientSession) {
+async function closeSession(session: PatientSession, updates: Record<string, unknown> = {}) {
   await Promise.all([
-    supabase.from("sessions").update({ ended_at: new Date().toISOString() }).eq("id", session.sessionId),
+    supabase.from("sessions").update({ ended_at: new Date().toISOString(), ...updates }).eq("id", session.sessionId),
     supabase.from("patients").update({ status: "Resting" }).eq("id", session.patientId),
   ]);
 }
@@ -29,28 +30,40 @@ export function usePatientSession() {
 
   const startSession = useCallback(async (patientId: string, patientName: string) => {
     if (current?.patientId === patientId) return current;
-    if (current) await closeSession(current);
+    const clickedAt = Date.now();
+    if (current) {
+      const ending = current;
+      current = null;
+      emit();
+      await closeSession(ending);
+    }
 
     const { data: auth } = await supabase.auth.getUser();
     const { data, error } = await supabase
       .from("sessions")
-      .insert({ patient_id: patientId, nurse_id: auth.user?.id ?? null })
+      .insert({ patient_id: patientId, nurse_id: auth.user?.id ?? null, started_at: new Date(clickedAt).toISOString() })
       .select("id, started_at")
       .single();
     if (error) throw error;
     await supabase.from("patients").update({ status: "Active" }).eq("id", patientId);
 
-    current = { sessionId: data.id, patientId, patientName, sessionStartedAt: data.started_at };
+    current = {
+      sessionId: data.id,
+      patientId,
+      patientName,
+      sessionStartedAt: data.started_at,
+      telemetryStartsAt: new Date(clickedAt + 3000).toISOString(),
+    };
     emit();
     return current;
   }, []);
 
-  const endSession = useCallback(async () => {
+  const endSession = useCallback(async (updates: Record<string, unknown> = {}) => {
     if (!current) return;
     const ending = current;
     current = null;
     emit();
-    await closeSession(ending);
+    await closeSession(ending, updates);
   }, []);
 
   return { session, startSession, endSession };

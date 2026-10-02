@@ -5,34 +5,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { VitalNumber } from "@/components/VitalNumber";
 import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
+import { usePatientSession } from "@/hooks/usePatientSession";
+import { useVitalSignsSubscription } from "@/hooks/useVitalSignsSubscription";
 
 export function PatientDrawer({ patientId, onClose }: { patientId: string | null; onClose: () => void }) {
   const qc = useQueryClient();
   const [notes, setNotes] = useState("");
   const [sys, setSys] = useState("");
   const [dia, setDia] = useState("");
+  const { session, startSession: beginSession, endSession: finishSession } = usePatientSession();
+  const patientSession = session?.patientId === patientId ? session : null;
+  const { vitals: sessionVitals } = useVitalSignsSubscription(patientSession);
 
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
     enabled: !!patientId,
     queryFn: async () => {
       const { data, error } = await supabase.from("patients").select("*").eq("id", patientId!).single();
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: vitals = [] } = useQuery({
-    queryKey: ["patient-vitals", patientId],
-    enabled: !!patientId,
-    queryFn: async () => {
-      const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-      const { data, error } = await supabase
-        .from("vitals")
-        .select("hr,spo2,temp,recorded_at")
-        .eq("patient_id", patientId!)
-        .gte("recorded_at", since)
-        .order("recorded_at");
       if (error) throw error;
       return data;
     },
@@ -66,8 +55,14 @@ export function PatientDrawer({ patientId, onClose }: { patientId: string | null
 
   if (!patientId) return null;
 
-  const latest = vitals.at(-1) as any;
-  const prev = vitals.at(-2) as any;
+  const vitals = sessionVitals.map((vital) => ({
+    hr: vital.heart_rate,
+    spo2: vital.spo2,
+    temp: vital.body_temperature,
+    recorded_at: vital.measured_at,
+  }));
+  const latest = vitals.at(-1);
+  const prev = vitals.at(-2);
   const trend = (k: "hr" | "spo2" | "temp"): "up" | "down" | "flat" | undefined => {
     if (!latest || !prev) return;
     const d = Number(latest[k]) - Number(prev[k]);
@@ -76,14 +71,26 @@ export function PatientDrawer({ patientId, onClose }: { patientId: string | null
   };
 
   const startSession = async () => {
-    const { error } = await supabase.from("sessions").insert({ patient_id: patientId });
-    if (error) return toast.error(error.message);
-    await supabase.from("patients").update({ status: "Active" }).eq("id", patientId);
-    toast.success("Session started");
-    qc.invalidateQueries();
+    try {
+      await beginSession(patientId, patient?.name ?? "Patient");
+      toast.success("Session started");
+      qc.invalidateQueries();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not start session");
+    }
   };
 
   const endSession = async () => {
+    if (patientSession) {
+      await finishSession({
+        notes,
+        systolic: sys ? parseInt(sys) : null,
+        diastolic: dia ? parseInt(dia) : null,
+      });
+      toast.success("Session ended");
+      qc.invalidateQueries();
+      return;
+    }
     if (!activeSession) return;
     const { error } = await supabase.from("sessions").update({
       ended_at: new Date().toISOString(),
@@ -177,7 +184,7 @@ export function PatientDrawer({ patientId, onClose }: { patientId: string | null
         </div>
 
         <div className="p-5 border-t border-border">
-          {activeSession ? (
+          {activeSession || patientSession ? (
             <button onClick={endSession} className="h-11 w-full rounded-lg bg-destructive text-destructive-foreground font-medium">End session</button>
           ) : (
             <button onClick={startSession} className="h-11 w-full rounded-lg bg-primary text-primary-foreground font-medium">Start session</button>

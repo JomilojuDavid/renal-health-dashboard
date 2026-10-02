@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { format } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { toast } from "sonner";
@@ -8,12 +7,6 @@ import { Wifi, WifiOff, Square, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePatientSession } from "@/hooks/usePatientSession";
 import { useVitalSignsSubscription } from "@/hooks/useVitalSignsSubscription";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/nurse/monitor")({
   component: MonitorPage,
@@ -35,8 +28,6 @@ type Patient = { id: string; name: string; age: number | null; diagnosis: string
 function MonitorPage() {
   const { session, startSession, endSession } = usePatientSession();
   const { vitals, latestVital, isConnected, error } = useVitalSignsSubscription(session);
-  const [confirmEnd, setConfirmEnd] = useState(false);
-  const [starting, setStarting] = useState<string | null>(null);
 
   const { data: patients = [] } = useQuery({
     queryKey: ["monitor-patients"],
@@ -48,13 +39,10 @@ function MonitorPage() {
   });
 
   const select = async (p: Patient) => {
-    setStarting(p.id);
     try {
       await startSession(p.id, p.name);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not start session");
-    } finally {
-      setStarting(null);
     }
   };
 
@@ -73,7 +61,6 @@ function MonitorPage() {
               <button
                 key={p.id}
                 onClick={() => select(p)}
-                disabled={starting !== null}
                 className={`w-full text-left rounded-xl border bg-card p-4 transition hover:shadow-md ${active ? "border-primary ring-2 ring-primary/20" : "border-border"}`}
               >
                 <div className="flex items-center gap-3">
@@ -83,7 +70,6 @@ function MonitorPage() {
                     <div className="text-xs text-muted-foreground">{p.age ?? "—"} yrs · {p.diagnosis ?? "—"}</div>
                   </div>
                   {active && <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Recording</span>}
-                  {starting === p.id && <span className="text-xs text-muted-foreground">Starting…</span>}
                 </div>
               </button>
             );
@@ -109,9 +95,9 @@ function MonitorPage() {
                     {isConnected ? <Wifi className="h-4 w-4 text-primary" /> : <WifiOff className="h-4 w-4 text-destructive" />}
                     {isConnected ? "Live" : "Connecting…"}
                   </span>
-                  <Button variant="destructive" size="sm" onClick={() => setConfirmEnd(true)} className="gap-2">
+                  <button className="inline-flex h-9 items-center gap-2 rounded-md bg-destructive px-3 text-sm font-medium text-destructive-foreground" onClick={() => void endSession()}>
                     <Square className="h-3.5 w-3.5" /> End Session
-                  </Button>
+                  </button>
                 </div>
               </div>
 
@@ -141,26 +127,10 @@ function MonitorPage() {
                 <p className="text-sm text-muted-foreground">Waiting for the first reading…</p>
               )}
 
-              <RecordReading patientId={session.patientId} sessionId={session.sessionId} startedAt={session.sessionStartedAt} />
             </div>
           )}
         </div>
       </div>
-
-      <AlertDialog open={confirmEnd} onOpenChange={setConfirmEnd}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>End session?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Recording stops for {session?.patientName}. {vitals.length} reading(s) were saved.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep recording</AlertDialogCancel>
-            <AlertDialogAction onClick={() => endSession()}>End Session</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
@@ -174,36 +144,4 @@ function Stat({ label, value, unit }: { label: string; value: string | number; u
   );
 }
 
-function RecordReading({ patientId, sessionId, startedAt }: { patientId: string; sessionId: string; startedAt: string }) {
-  const [spo2, setSpo2] = useState("");
-  const [hr, setHr] = useState("");
-  const [temp, setTemp] = useState("");
-  const [saving, setSaving] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!spo2 && !hr && !temp) return;
-    setSaving(true);
-    const { error } = await supabase.from("vital_sign_logs").insert({
-      patient_id: patientId,
-      session_id: sessionId,
-      session_started_at: startedAt,
-      spo2: spo2 ? Number(spo2) : null,
-      heart_rate: hr ? Math.round(Number(hr)) : null,
-      body_temperature: temp ? Number(temp) : null,
-      measured_at: new Date().toISOString(),
-    });
-    setSaving(false);
-    if (error) return toast.error(error.message);
-    setSpo2(""); setHr(""); setTemp("");
-  };
-
-  return (
-    <form onSubmit={submit} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-      <Input type="number" step="0.1" placeholder="SpO₂ %" value={spo2} onChange={(e) => setSpo2(e.target.value)} />
-      <Input type="number" placeholder="HR bpm" value={hr} onChange={(e) => setHr(e.target.value)} />
-      <Input type="number" step="0.1" placeholder="Temp °C" value={temp} onChange={(e) => setTemp(e.target.value)} />
-      <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Record reading"}</Button>
-    </form>
-  );
-}

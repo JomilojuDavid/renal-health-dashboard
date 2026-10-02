@@ -3,11 +3,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { usePatientSession } from "@/hooks/usePatientSession";
 
 export const Route = createFileRoute("/nurse/sessions")({ component: SessionsPage, ssr: false });
 
 function SessionsPage() {
   const qc = useQueryClient();
+  const { session, endSession: finishSession } = usePatientSession();
   const [now, setNow] = useState(Date.now());
   useEffect(() => { const i = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(i); }, []);
 
@@ -49,6 +51,12 @@ function SessionsPage() {
   });
 
   const endSession = async (id: string, patient_id: string) => {
+    if (session?.sessionId === id) {
+      await finishSession();
+      toast.success("Session ended");
+      qc.invalidateQueries();
+      return;
+    }
     const { error } = await supabase.from("sessions").update({ ended_at: new Date().toISOString() }).eq("id", id);
     if (error) return toast.error(error.message);
     await supabase.from("patients").update({ status: "Resting" }).eq("id", patient_id);

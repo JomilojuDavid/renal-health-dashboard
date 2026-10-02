@@ -5,6 +5,7 @@ import { Plus, Search, Trash2, Pencil, X, Link2, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "./nurse.index";
 import { toast } from "sonner";
+import { usePatientSession } from "@/hooks/usePatientSession";
 
 
 export const Route = createFileRoute("/nurse/patients")({
@@ -17,6 +18,7 @@ const emptyForm: Form = { name: "", age: "", gender: "", diagnosis: "", contact:
 
 function PatientsPage() {
   const qc = useQueryClient();
+  const { startSession: beginSession } = usePatientSession();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [modalOpen, setModalOpen] = useState(false);
@@ -111,11 +113,7 @@ function PatientsPage() {
   });
 
   const startSession = useMutation({
-    mutationFn: async (patientId: string) => {
-      const { error } = await supabase.from("sessions").insert({ patient_id: patientId, started_at: new Date().toISOString() });
-      if (error) throw error;
-      await supabase.from("patients").update({ status: "Active" }).eq("id", patientId);
-    },
+    mutationFn: ({ patientId, patientName }: { patientId: string; patientName: string }) => beginSession(patientId, patientName),
     onSuccess: () => { toast.success("Session started"); qc.invalidateQueries(); },
     onError: (e: any) => toast.error(e.message),
   });
@@ -176,7 +174,7 @@ function PatientsPage() {
                     {(activeSessions as any)[p.id] ? (
                       <span className="h-8 px-2 inline-flex items-center rounded text-xs text-primary">In session</span>
                     ) : (
-                      <button title="Start session" onClick={() => startSession.mutate(p.id)} className="h-8 w-8 grid place-items-center rounded hover:bg-accent text-primary"><Play className="h-4 w-4" /></button>
+                      <button title="Start session" onClick={() => startSession.mutate({ patientId: p.id, patientName: p.name })} className="h-8 w-8 grid place-items-center rounded hover:bg-accent text-primary"><Play className="h-4 w-4" /></button>
                     )}
                     <button title={p.user_id ? "Linked account" : "Link login account"} onClick={() => setLinkFor(p)} className={`h-8 w-8 grid place-items-center rounded hover:bg-accent ${p.user_id ? "text-primary" : "text-muted-foreground"}`}><Link2 className="h-4 w-4" /></button>
                     <button onClick={() => { setEditing(p.id); setForm({ name: p.name, age: p.age?.toString() ?? "", gender: p.gender ?? "", diagnosis: p.diagnosis ?? "", contact: p.contact ?? "", dialysis_frequency: p.dialysis_frequency ?? "" }); setModalOpen(true); }} className="h-8 w-8 grid place-items-center rounded hover:bg-accent"><Pencil className="h-4 w-4" /></button>
