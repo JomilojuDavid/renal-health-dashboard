@@ -17,7 +17,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatientIndexRouteImport } from './routes/patient.index'
 import { Route as NurseIndexRouteImport } from './routes/nurse.index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as PatientVitalsRouteImport } from './routes/patient.vitals'
 import { Route as PatientSessionsRouteImport } from './routes/patient.sessions'
 import { Route as PatientProfileRouteImport } from './routes/patient.profile'
@@ -26,7 +25,6 @@ import { Route as NurseSessionsRouteImport } from './routes/nurse.sessions'
 import { Route as NurseReportsRouteImport } from './routes/nurse.reports'
 import { Route as NursePatientsRouteImport } from './routes/nurse.patients'
 import { Route as NurseAlertsRouteImport } from './routes/nurse.alerts'
-import { Route as DashboardVitalsRouteImport } from './routes/dashboard/vitals'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -68,11 +66,6 @@ const NurseIndexRoute = NurseIndexRouteImport.update({
   path: '/',
   getParentRoute: () => NurseRoute,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PatientVitalsRoute = PatientVitalsRouteImport.update({
   id: '/vitals',
   path: '/vitals',
@@ -113,11 +106,6 @@ const NurseAlertsRoute = NurseAlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => NurseRoute,
 } as any)
-const DashboardVitalsRoute = DashboardVitalsRouteImport.update({
-  id: '/dashboard/vitals',
-  path: '/dashboard/vitals',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -126,7 +114,6 @@ export interface FileRoutesByFullPath {
   '/nurse': typeof NurseRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
-  '/dashboard/vitals': typeof DashboardVitalsRoute
   '/nurse/alerts': typeof NurseAlertsRoute
   '/nurse/patients': typeof NursePatientsRoute
   '/nurse/reports': typeof NurseReportsRoute
@@ -135,7 +122,6 @@ export interface FileRoutesByFullPath {
   '/patient/profile': typeof PatientProfileRoute
   '/patient/sessions': typeof PatientSessionsRoute
   '/patient/vitals': typeof PatientVitalsRoute
-  '/dashboard/': typeof DashboardIndexRoute
   '/nurse/': typeof NurseIndexRoute
   '/patient/': typeof PatientIndexRoute
 }
@@ -144,7 +130,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/dashboard/vitals': typeof DashboardVitalsRoute
   '/nurse/alerts': typeof NurseAlertsRoute
   '/nurse/patients': typeof NursePatientsRoute
   '/nurse/reports': typeof NurseReportsRoute
@@ -153,7 +138,6 @@ export interface FileRoutesByTo {
   '/patient/profile': typeof PatientProfileRoute
   '/patient/sessions': typeof PatientSessionsRoute
   '/patient/vitals': typeof PatientVitalsRoute
-  '/dashboard': typeof DashboardIndexRoute
   '/nurse': typeof NurseIndexRoute
   '/patient': typeof PatientIndexRoute
 }
@@ -165,7 +149,6 @@ export interface FileRoutesById {
   '/nurse': typeof NurseRouteWithChildren
   '/patient': typeof PatientRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
-  '/dashboard/vitals': typeof DashboardVitalsRoute
   '/nurse/alerts': typeof NurseAlertsRoute
   '/nurse/patients': typeof NursePatientsRoute
   '/nurse/reports': typeof NurseReportsRoute
@@ -174,7 +157,6 @@ export interface FileRoutesById {
   '/patient/profile': typeof PatientProfileRoute
   '/patient/sessions': typeof PatientSessionsRoute
   '/patient/vitals': typeof PatientVitalsRoute
-  '/dashboard/': typeof DashboardIndexRoute
   '/nurse/': typeof NurseIndexRoute
   '/patient/': typeof PatientIndexRoute
 }
@@ -187,7 +169,6 @@ export interface FileRouteTypes {
     | '/nurse'
     | '/patient'
     | '/reset-password'
-    | '/dashboard/vitals'
     | '/nurse/alerts'
     | '/nurse/patients'
     | '/nurse/reports'
@@ -196,7 +177,6 @@ export interface FileRouteTypes {
     | '/patient/profile'
     | '/patient/sessions'
     | '/patient/vitals'
-    | '/dashboard/'
     | '/nurse/'
     | '/patient/'
   fileRoutesByTo: FileRoutesByTo
@@ -205,7 +185,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/forgot-password'
     | '/reset-password'
-    | '/dashboard/vitals'
     | '/nurse/alerts'
     | '/nurse/patients'
     | '/nurse/reports'
@@ -214,7 +193,6 @@ export interface FileRouteTypes {
     | '/patient/profile'
     | '/patient/sessions'
     | '/patient/vitals'
-    | '/dashboard'
     | '/nurse'
     | '/patient'
   id:
@@ -225,7 +203,6 @@ export interface FileRouteTypes {
     | '/nurse'
     | '/patient'
     | '/reset-password'
-    | '/dashboard/vitals'
     | '/nurse/alerts'
     | '/nurse/patients'
     | '/nurse/reports'
@@ -234,7 +211,6 @@ export interface FileRouteTypes {
     | '/patient/profile'
     | '/patient/sessions'
     | '/patient/vitals'
-    | '/dashboard/'
     | '/nurse/'
     | '/patient/'
   fileRoutesById: FileRoutesById
@@ -246,8 +222,6 @@ export interface RootRouteChildren {
   NurseRoute: typeof NurseRouteWithChildren
   PatientRoute: typeof PatientRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
-  DashboardVitalsRoute: typeof DashboardVitalsRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -308,13 +282,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NurseIndexRouteImport
       parentRoute: typeof NurseRoute
     }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/patient/vitals': {
       id: '/patient/vitals'
       path: '/vitals'
@@ -371,13 +338,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NurseAlertsRouteImport
       parentRoute: typeof NurseRoute
     }
-    '/dashboard/vitals': {
-      id: '/dashboard/vitals'
-      path: '/dashboard/vitals'
-      fullPath: '/dashboard/vitals'
-      preLoaderRoute: typeof DashboardVitalsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -425,8 +385,6 @@ const rootRouteChildren: RootRouteChildren = {
   NurseRoute: NurseRouteWithChildren,
   PatientRoute: PatientRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
-  DashboardVitalsRoute: DashboardVitalsRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
