@@ -220,6 +220,57 @@ export type Database = {
         }
         Relationships: []
       }
+      vital_sign_logs: {
+        Row: {
+          body_temperature: number | null
+          heart_rate: number | null
+          id: string
+          measured_at: string
+          patient_id: string
+          recorded_by: string | null
+          session_id: string | null
+          session_started_at: string
+          spo2: number | null
+        }
+        Insert: {
+          body_temperature?: number | null
+          heart_rate?: number | null
+          id?: string
+          measured_at?: string
+          patient_id: string
+          recorded_by?: string | null
+          session_id?: string | null
+          session_started_at: string
+          spo2?: number | null
+        }
+        Update: {
+          body_temperature?: number | null
+          heart_rate?: number | null
+          id?: string
+          measured_at?: string
+          patient_id?: string
+          recorded_by?: string | null
+          session_id?: string | null
+          session_started_at?: string
+          spo2?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vital_sign_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vital_sign_logs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vitals: {
         Row: {
           hr: number | null
