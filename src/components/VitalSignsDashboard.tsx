@@ -1,6 +1,5 @@
-// src/components/VitalSignsDashboard.tsx
 import { useVitalSignsSubscription } from "@/hooks/useVitalSignsSubscription";
-import { SensorSimulationControl } from "@/components/SensorSimulationControl";
+import { usePatientSession } from "@/hooks/usePatientSession";
 import {
   LineChart,
   Line,
@@ -19,6 +18,9 @@ import { AlertCircle, Wifi, WifiOff, Loader2 } from "lucide-react";
 export function VitalSignsDashboard() {
   const { vitals, latestVital, isConnected, isLoading, error } =
     useVitalSignsSubscription(50);
+  const { getCurrentSession } = usePatientSession();
+
+  const activeSession = getCurrentSession();
 
   const chartData = vitals.map((vital) => ({
     timestamp: format(new Date(vital.measured_at), "HH:mm:ss"),
@@ -29,28 +31,66 @@ export function VitalSignsDashboard() {
 
   // Determine status badge colors
   const getSpO2Status = (spo2: number) => {
-    if (spo2 >= 95) return { color: "bg-green-50", textColor: "text-green-600", label: "Normal" };
-    if (spo2 >= 90) return { color: "bg-yellow-50", textColor: "text-yellow-600", label: "Low" };
+    if (spo2 >= 95)
+      return {
+        color: "bg-green-50",
+        textColor: "text-green-600",
+        label: "Normal",
+      };
+    if (spo2 >= 90)
+      return {
+        color: "bg-yellow-50",
+        textColor: "text-yellow-600",
+        label: "Low",
+      };
     return { color: "bg-red-50", textColor: "text-red-600", label: "Critical" };
   };
 
   const getHRStatus = (hr: number) => {
-    if (hr >= 60 && hr <= 100) return { color: "bg-green-50", textColor: "text-green-600", label: "Normal" };
-    if (hr < 60) return { color: "bg-blue-50", textColor: "text-blue-600", label: "Low" };
+    if (hr >= 60 && hr <= 100)
+      return { color: "bg-green-50", textColor: "text-green-600", label: "Normal" };
+    if (hr < 60)
+      return { color: "bg-blue-50", textColor: "text-blue-600", label: "Low" };
     return { color: "bg-red-50", textColor: "text-red-600", label: "High" };
   };
 
   const getTempStatus = (temp: number) => {
-    if (temp >= 36.5 && temp <= 37.5) return { color: "bg-green-50", textColor: "text-green-600", label: "Normal" };
-    if (temp < 36.5) return { color: "bg-blue-50", textColor: "text-blue-600", label: "Low" };
+    if (temp >= 36.5 && temp <= 37.5)
+      return {
+        color: "bg-green-50",
+        textColor: "text-green-600",
+        label: "Normal",
+      };
+    if (temp < 36.5)
+      return { color: "bg-blue-50", textColor: "text-blue-600", label: "Low" };
     return { color: "bg-red-50", textColor: "text-red-600", label: "High" };
   };
+
+  if (!activeSession) {
+    return (
+      <div className="w-full p-6">
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <p className="text-gray-600 font-medium">
+            No active session
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Select a patient to begin monitoring vital signs
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-4 p-6">
       {/* Header with Status */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Vital Signs Monitor</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Vital Signs Monitor</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Patient: <strong>{activeSession.patientName}</strong>
+          </p>
+        </div>
         <div className="flex items-center gap-2">
           {isConnected ? (
             <>
@@ -69,9 +109,6 @@ export function VitalSignsDashboard() {
           )}
         </div>
       </div>
-
-      {/* Sensor Simulator Control */}
-      <SensorSimulationControl />
 
       {/* Error Alert */}
       {error && (
@@ -124,7 +161,11 @@ export function VitalSignsDashboard() {
                 </p>
                 <div className="flex justify-between items-center mt-2">
                   <p className="text-xs text-gray-500">
-                    {latestVital.heart_rate < 60 ? "↓ Low" : latestVital.heart_rate > 100 ? "↑ High" : "→ Normal"}
+                    {latestVital.heart_rate < 60
+                      ? "↓ Low"
+                      : latestVital.heart_rate > 100
+                        ? "↑ High"
+                        : "→ Normal"}
                   </p>
                   <Badge variant="secondary" className="text-xs">
                     {status.label}
@@ -145,7 +186,11 @@ export function VitalSignsDashboard() {
                 </p>
                 <div className="flex justify-between items-center mt-2">
                   <p className="text-xs text-gray-500">
-                    {latestVital.body_temperature < 36.5 ? "↓ Low" : latestVital.body_temperature > 37.5 ? "↑ High" : "→ Normal"}
+                    {latestVital.body_temperature < 36.5
+                      ? "↓ Low"
+                      : latestVital.body_temperature > 37.5
+                        ? "↑ High"
+                        : "→ Normal"}
                   </p>
                   <Badge variant="secondary" className="text-xs">
                     {status.label}
@@ -184,7 +229,7 @@ export function VitalSignsDashboard() {
                 orientation="right"
                 domain={[40, 120]}
                 label={{
-                  value: "HR (bpm) / Temp (°C × 10)",
+                  value: "HR (bpm) / Temp (°C)",
                   angle: 90,
                   position: "insideRight",
                 }}
@@ -223,16 +268,6 @@ export function VitalSignsDashboard() {
         </div>
       )}
 
-      {/* Empty State */}
-      {!isLoading && vitals.length === 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-600">No vital signs recorded yet</p>
-          <p className="text-sm text-gray-500 mt-2">
-            Click "Start" above to simulate sensor data
-          </p>
-        </div>
-      )}
-
       {/* Data Table */}
       {!isLoading && vitals.length > 0 && (
         <div className="bg-white border rounded-lg overflow-hidden">
@@ -244,7 +279,6 @@ export function VitalSignsDashboard() {
                   <th className="px-4 py-2 text-right">SpO2</th>
                   <th className="px-4 py-2 text-right">HR</th>
                   <th className="px-4 py-2 text-right">Temp</th>
-                  <th className="px-4 py-2 text-center">Source</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -264,13 +298,6 @@ export function VitalSignsDashboard() {
                       </td>
                       <td className="px-4 py-2 text-right font-mono">
                         {vital.body_temperature.toFixed(1)}°C
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <Badge variant="outline" className="text-xs">
-                          {vital.device_id === "simulator-001"
-                            ? "🎮 Simulated"
-                            : "📱 Device"}
-                        </Badge>
                       </td>
                     </tr>
                   ))}
