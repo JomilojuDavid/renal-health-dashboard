@@ -13,6 +13,7 @@ export const Route = createFileRoute("/nurse")({
 
 const nav: { to: string; label: string; icon: typeof Home; exact?: boolean }[] = [
   { to: "/nurse", label: "Dashboard", icon: Home, exact: true },
+  { to: "/nurse/monitor", label: "Live Monitor", icon: Activity },
   { to: "/nurse/patients", label: "Patients", icon: Users },
   { to: "/nurse/sessions", label: "Active Sessions", icon: Activity },
   { to: "/nurse/alerts", label: "Alerts", icon: BellRing },

@@ -24,6 +24,7 @@ import { Route as NurseSettingsRouteImport } from './routes/nurse.settings'
 import { Route as NurseSessionsRouteImport } from './routes/nurse.sessions'
 import { Route as NurseReportsRouteImport } from './routes/nurse.reports'
 import { Route as NursePatientsRouteImport } from './routes/nurse.patients'
+import { Route as NurseMonitorRouteImport } from './routes/nurse.monitor'
 import { Route as NurseAlertsRouteImport } from './routes/nurse.alerts'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -101,6 +102,11 @@ const NursePatientsRoute = NursePatientsRouteImport.update({
   path: '/patients',
   getParentRoute: () => NurseRoute,
 } as any)
+const NurseMonitorRoute = NurseMonitorRouteImport.update({
+  id: '/monitor',
+  path: '/monitor',
+  getParentRoute: () => NurseRoute,
+} as any)
 const NurseAlertsRoute = NurseAlertsRouteImport.update({
   id: '/alerts',
   path: '/alerts',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/patient': typeof PatientRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/nurse/alerts': typeof NurseAlertsRoute
+  '/nurse/monitor': typeof NurseMonitorRoute
   '/nurse/patients': typeof NursePatientsRoute
   '/nurse/reports': typeof NurseReportsRoute
   '/nurse/sessions': typeof NurseSessionsRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/nurse/alerts': typeof NurseAlertsRoute
+  '/nurse/monitor': typeof NurseMonitorRoute
   '/nurse/patients': typeof NursePatientsRoute
   '/nurse/reports': typeof NurseReportsRoute
   '/nurse/sessions': typeof NurseSessionsRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/patient': typeof PatientRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/nurse/alerts': typeof NurseAlertsRoute
+  '/nurse/monitor': typeof NurseMonitorRoute
   '/nurse/patients': typeof NursePatientsRoute
   '/nurse/reports': typeof NurseReportsRoute
   '/nurse/sessions': typeof NurseSessionsRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/patient'
     | '/reset-password'
     | '/nurse/alerts'
+    | '/nurse/monitor'
     | '/nurse/patients'
     | '/nurse/reports'
     | '/nurse/sessions'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/nurse/alerts'
+    | '/nurse/monitor'
     | '/nurse/patients'
     | '/nurse/reports'
     | '/nurse/sessions'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/patient'
     | '/reset-password'
     | '/nurse/alerts'
+    | '/nurse/monitor'
     | '/nurse/patients'
     | '/nurse/reports'
     | '/nurse/sessions'
@@ -331,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NursePatientsRouteImport
       parentRoute: typeof NurseRoute
     }
+    '/nurse/monitor': {
+      id: '/nurse/monitor'
+      path: '/monitor'
+      fullPath: '/nurse/monitor'
+      preLoaderRoute: typeof NurseMonitorRouteImport
+      parentRoute: typeof NurseRoute
+    }
     '/nurse/alerts': {
       id: '/nurse/alerts'
       path: '/alerts'
@@ -343,6 +362,7 @@ declare module '@tanstack/react-router' {
 
 interface NurseRouteChildren {
   NurseAlertsRoute: typeof NurseAlertsRoute
+  NurseMonitorRoute: typeof NurseMonitorRoute
   NursePatientsRoute: typeof NursePatientsRoute
   NurseReportsRoute: typeof NurseReportsRoute
   NurseSessionsRoute: typeof NurseSessionsRoute
@@ -352,6 +372,7 @@ interface NurseRouteChildren {
 
 const NurseRouteChildren: NurseRouteChildren = {
   NurseAlertsRoute: NurseAlertsRoute,
+  NurseMonitorRoute: NurseMonitorRoute,
   NursePatientsRoute: NursePatientsRoute,
   NurseReportsRoute: NurseReportsRoute,
   NurseSessionsRoute: NurseSessionsRoute,
