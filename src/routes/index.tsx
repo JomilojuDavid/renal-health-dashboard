@@ -1,28 +1,30 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useAuth } from "@/lib/auth";
-import { RenalLogo } from "@/components/RenalLogo";
+import { createFileRoute } from "@tanstack/react-router";
+import { PatientList } from "@/components/PatientList";
+import { VitalSignsDashboard } from "@/components/VitalSignsDashboard";
 
-export const Route = createFileRoute("/")({
-  component: Index,
-  ssr: false,
-});
+export const Route = createFileRoute("/dashboard/")({component: DashboardPage});
 
-function Index() {
-  const { user, role, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (loading) return;
-    if (!user) navigate({ to: "/auth" });
-    else if (role === "nurse") navigate({ to: "/nurse" });
-    else if (role === "patient") navigate({ to: "/patient" });
-    else navigate({ to: "/auth" });
-  }, [user, role, loading, navigate]);
-
+function DashboardPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <RenalLogo />
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Patient List - Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg border p-4 sticky top-6">
+              <h2 className="text-lg font-semibold mb-4">Patients</h2>
+              <PatientList />
+            </div>
+          </div>
+
+          {/* Vital Signs Dashboard - Main */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg border">
+              <VitalSignsDashboard />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
